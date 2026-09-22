@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LAMP Architecture & Website Presentation - 22 Slides Interactive Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #090d16;
+            display: grid;
+            gap: 20px;
+            grid-template-columns: 1fr;
+            min-height: 100vh;
+            padding: 20px 0;
+            place-items: center;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .presentation-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            width: 100%;
+            max-width: 1280px;
+        }
+
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0 10px;
+        }
+
+        .nav-controls span {
+            color: #9ca3af;
+            font-weight: 600;
+            font-size: 15px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .nav-btn {
+            background: #1f2937;
+            color: #f3f4f6;
+            border: 1px solid #374151;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        .slide-container {
+            align-items: center;
+            background-color: #111827;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            display: none;
+            flex-direction: column;
+            height: 720px;
+            justify-content: center;
+            overflow: hidden;
+            padding: 40px 50px;
+            position: relative;
+            width: 1280px;
+            border: 1px solid #1f2937;
+        }
+
+        .slide-container.active-slide {
+            display: flex;
+        }
+
+        .slide-container::before {
+            content: '';
+            height: 100%;
+            left: 0;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            z-index: 0;
+            background: radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+                        radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.08) 0%, transparent 40%);
+        }
+
+        .slide-container > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        h1, h2, h3 {
+            color: #f9fafb;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+        }
+
+        p, li, th, td, .subtitle {
+            color: #9ca3af;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            line-height: 1.45;
+        }
+
+        .slide-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-align: left;
+            width: 100%;
+            color: #f3f4f6;
+            letter-spacing: -0.5px;
+            border-bottom: 2px solid #1f2937;
+            padding-bottom: 8px;
+        }
+
+        .content-area {
+            align-items: center;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .interactive-card {
+            background-color: #1f2937;
+            border-radius: 12px;
+            border: 1px solid #374151;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            text-align: left;
+            flex: 1;
+        }
+
+        .interactive-card:hover {
+            transform: translateY(-4px);
+            border-color: #3b82f6;
+            box-shadow: 0 10px 20px -5px rgba(59, 130, 246, 0.2);
+        }
+
+        .interactive-card.active {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            box-shadow: 0 12px 25px -5px rgba(16, 185, 129, 0.25);
+        }
+
+        .reveal-content {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.4s ease, margin-top 0.4s ease;
+        }
+
+        .interactive-card.active .reveal-content {
+            max-height: 180px;
+            opacity: 1;
+            margin-top: 10px;
+        }
+
+        .click-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: #60a5fa;
+            background: rgba(59, 130, 246, 0.1);
+            padding: 3px 8px;
+            border-radius: 20px;
+            margin-top: 10px;
+            font-weight: 600;
+            width: fit-content;
+        }
+
+        .interactive-card.active .click-hint {
+            color: #34d399;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .title-layout {
+            text-align: center;
+            max-width: 950px;
+        }
+
+        .title-layout h1 {
+            font-size: 42px;
+            line-height: 1.15;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #60a5fa 0%, #34d399 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .title-layout .subtitle {
+            font-size: 17px;
+            color: #d1d5db;
+            margin-bottom: 12px;
+        }
+
+        .team-box {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            padding: 14px 20px;
+            border-radius: 10px;
+            margin-top: 12px;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .team-member {
+            background-color: #111827;
+            border: 1px solid #374151;
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #60a5fa;
+            font-weight: 600;
+        }
+
+        .two-column {
+            align-items: center;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            width: 100%;
+        }
+
+        .two-column ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .two-column li {
+            margin-bottom: 10px;
+            position: relative;
+            padding-left: 24px;
+            color: #d1d5db;
+            font-size: 15px;
+        }
+
+        .two-column li i {
+            position: absolute;
+            left: 0;
+            top: 3px;
+            color: #3b82f6;
+        }
+
+        .image-wrapper {
+            border-radius: 10px;
+            height: 300px;
+            max-width: 100%;
+            overflow: hidden;
+            width: 100%;
+            border: 1px solid #374151;
+            background-color: #1f2937;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .image-wrapper:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .image-wrapper img {
+            height: 100%;
+            max-width: 100%;
+            object-fit: cover;
+            width: 100%;
+        }
+
+        .image-overlay-hint {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(17, 24, 39, 0.85);
+            color: #60a5fa;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+            border: 1px solid #374151;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tiled-content {
+            align-items: stretch;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .table-layout {
+            width: 100%;
+        }
+
+        .table-layout table {
+            border-collapse: collapse;
+            width: 100%;
+            background-color: #1f2937;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #374151;
+        }
+
+        .table-layout th, .table-layout td {
+            border-bottom: 1px solid #374151;
+            padding: 10px 14px;
+            text-align: left;
+        }
+
+        .table-layout th {
+            background-color: #111827;
+            color: #f3f4f6;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .table-layout td {
+            color: #d1d5db;
+            font-size: 13px;
+        }
+
+        .badge {
+            background-color: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        #imageModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #imageModal.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: #111827;
+            border: 1px solid #374151;
+            border-radius: 14px;
+            padding: 25px;
+            max-width: 650px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 15px;
+            background: #1f2937;
+            color: #f9fafb;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #ef4444;
+        }
+    </style>
+</head>
+<body>
+
+<div class="presentation-wrapper">
+    <div class="nav-controls">
+        <button class="nav-btn" onclick="changeSlide(-1)"><i class="fa-solid fa-arrow-left"></i> Previous</button>
+        <span id="slideIndicator">Slide 1 of 22</span>
+        <button class="nav-btn" onclick="changeSlide(1)">Next <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+
+    <!-- Slide 1: Title Slide -->
+    <div class="slide-container active-slide" id="slide1">
+        <div class="title-layout">
+            <span class="badge">HOLY GRACE ACADEMY OF ENGINEERING</span>
+            <h1>Interactive LAMP Architecture & Website Showcase</h1>
+            <p class="subtitle">Complete Technical Presentation with Dynamic Click-to-Explore Animations</p>
+            <div class="team-box">
+                <p style="color: #93c5fd; font-weight: 600; margin-bottom: 6px;"><i class="fa-solid fa-users"></i> Project Team Members:</p>
+                <div class="team-grid">
+                    <div class="team-member">Fester Lonappan</div>
+                    <div class="team-member">Athul Krishna PS</div>
+                    <div class="team-member">Neil Joshy</div>
+                    <div class="team-member">Abel Steephan</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: Academic Context -->
+    <div class="slide-container" id="slide2">
+        <h2 class="slide-title">Academic Context & Objectives</h2>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-graduation-cap"></i></div>
+                    <h3>Holy Grace Academy</h3>
+                    <p>Engineering excellence and practical deployment methodologies.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Details:</strong> Departmental project focused on web systems engineering and enterprise architecture.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-laptop-code"></i></div>
+                    <h3>Applied Web Stack</h3>
+                    <p>Bridging theoretical OS concepts with active web application development.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Details:</strong> Exploring the full lifecycle from server-side scripting to browser rendering.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-diagram-project"></i></div>
+                    <h3>System Integration</h3>
+                    <p>Connecting Linux, Apache, MySQL, and PHP into a cohesive production environment.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Details:</strong> Seamlessly orchestrating requests across multiple software tiers.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: About the Website -->
+    <div class="slide-container" id="slide3">
+        <h2 class="slide-title">About the Created Website (Click Mockup)</h2>
+        <div class="content-area">
+            <div class="two-column">
+                <div>
+                    <span class="badge">PORTFOLIO DEPLOYMENT</span>
+                    <p style="margin-bottom: 10px; color: #d1d5db;">Hosted at <code style="color: #60a5fa; font-family: 'JetBrains Mono'; font-size: 12px;">festerlonappan.github.io/My-website-/</code></p>
+                    <ul>
+                        <li><i class="fa-solid fa-check"></i> Showcases personal software engineering projects.</li>
+                        <li><i class="fa-solid fa-check"></i> Built with semantic HTML5, CSS3, and JavaScript.</li>
+                        <li><i class="fa-solid fa-check"></i> Fully responsive layout optimized for all device sizes.</li>
+                    </ul>
+                    <div class="click-hint"><i class="fa-solid fa-hand-pointer"></i> Click picture on right for details</div>
+                </div>
+                <div>
+                    <div class="image-wrapper" onclick="openModal('Portfolio Website Architecture', 'This website serves as Fester Lonappan’s professional digital CV. Built with clean semantic markup and responsive CSS styling, it demonstrates modern frontend principles, CSS flexbox/grid layouts, and interactive UI components hosted seamlessly via GitHub Pages.')">
+                        <img src="https://placehold.co/600x400/1f2937/60a5fa?text=Fester+Lonappan+Portfolio" alt="Portfolio website mockup screen" onerror="this.src='https://placehold.co/600x400/1f2937/60a5fa?text=Portfolio'">
+                        <div class="image-overlay-hint"><i class="fa-solid fa-magnifying-glass-plus"></i> Click to Inspect</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Website Frontend Tech -->
+    <div class="slide-container" id="slide4">
+        <h2 class="slide-title">Website Frontend Technologies</h2>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-code"></i></div>
+                    <h3>HTML5 Semantic Layout</h3>
+                    <p>Structured document hierarchy for maximum accessibility and SEO.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Uses header, section, article, and footer tags for clean DOM parsing.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-palette"></i></div>
+                    <h3>CSS3 Styling & Grid</h3>
+                    <p>Advanced flexbox and grid positioning for gorgeous aesthetic appeal.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Responsive media queries adapt layouts smoothly across desktop and mobile screens.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-bolt"></i></div>
+                    <h3>Interactive JavaScript</h3>
+                    <p>Dynamic event listeners for interactive animations and user feedback.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Manipulates DOM elements instantly without requiring full page reloads.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Website Features & Hosting -->
+    <div class="slide-container" id="slide5">
+        <h2 class="slide-title">Website Hosting & Deployment Flow</h2>
+        <div class="content-area">
+            <div class="two-column">
+                <div>
+                    <span class="badge">GITHUB PAGES DEPLOYMENT</span>
+                    <p style="margin-bottom: 10px; color: #d1d5db;">Continuous deployment pipeline directly from GitHub version control repository.</p>
+                    <ul>
+                        <li><i class="fa-solid fa-check"></i> Instant static file hosting and global CDN distribution.</li>
+                        <li><i class="fa-solid fa-check"></i> Automatic HTTPS SSL certificate encryption.</li>
+                        <li><i class="fa-solid fa-check"></i> Version tracking for all code commits and asset updates.</li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="interactive-card" onclick="toggleCard(this)" style="background-color: #1f2937;">
+                        <h3><i class="fa-solid fa-server" style="color: #60a5fa;"></i> Hosting Architecture</h3>
+                        <p>How code moves from local workspace to live browser viewing.</p>
+                        <div class="reveal-content">
+                            <p style="color: #34d399; font-size: 13px;"><strong>Flow:</strong> Local Git Commit → Push to GitHub Repository → GitHub Actions Build → Edge CDN Delivery to User Browser.</p>
+                        </div>
+                        <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click for Workflow Theory</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Introduction to LAMP Stack -->
+    <div class="slide-container" id="slide6">
+        <h2 class="slide-title">Introduction to LAMP Stack Architecture</h2>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-layer-group"></i></div>
+                    <h3>Industry Standard</h3>
+                    <p>The legendary open-source web platform powering millions of sites globally.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Proven reliability, immense community support, and robust performance.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-puzzle-piece"></i></div>
+                    <h3>Modular Integration</h3>
+                    <p>Each component plugs into the next with standardized APIs and protocols.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Decoupled layers allow independent scaling and hardware optimization.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h3>Enterprise Security</h3>
+                    <p>Battle-tested security hardening at both OS and application levels.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Comprehensive permission controls protect data assets against breaches.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: LAMP Component Summary Table -->
+    <div class="slide-container" id="slide7">
+        <h2 class="slide-title">LAMP Stack Component Breakdown</h2>
+        <div class="content-area">
+            <div class="table-layout">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Layer</th>
+                            <th>Component</th>
+                            <th>Primary Role in Web Architecture</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>L</strong>inux</td>
+                            <td>Operating System</td>
+                            <td>Provides secure kernel foundation and hardware resource management.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>A</strong>pache</td>
+                            <td>Web Server</td>
+                            <td>Receives incoming HTTP client requests and routes them appropriately.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>M</strong>ySQL</td>
+                            <td>Database System</td>
+                            <td>Stores persistent user data, portfolio records, and dynamic content.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>P</strong>HP</td>
+                            <td>Scripting Language</td>
+                            <td>Executes server-side application logic and generates dynamic web pages.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Linux OS Foundation 1 -->
+    <div class="slide-container" id="slide8">
+        <h2 class="slide-title">Linux OS Foundation: Kernel & Stability</h2>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-terminal"></i></div>
+                    <h3>Open-Source Core</h3>
+                    <p>Stable, high-performance kernel powering secure server environments.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Full customization and zero licensing fees for enterprise hosting.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-microchip"></i></div>
+                    <h3>Hardware Control</h3>
+                    <p>Direct communication with CPU, memory, and disk controllers.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Optimized process scheduling ensures maximum hardware utilization.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    <h3>Uptime & Reliability</h3>
+                    <p>Engineered to run continuously for years without requiring reboots.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Exceptional fault isolation prevents single service crashes from halting the OS.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Linux OS Foundation 2 -->
+    <div class="slide-container" id="slide9">
+        <h2 class="slide-title">Linux OS Foundation: Security & Permissions</h2>
+        <div class="content-area">
+            <div class="two-column">
+                <div>
+                    <span class="badge">ACCESS CONTROL & FIREWALLS</span>
+                    <p style="margin-bottom: 10px; color: #d1d5db;">Granular file permission models and kernel-level security modules.</p>
+                    <ul>
+                        <li><i class="fa-solid fa-check"></i> Read/write/execute permission bits per user and group.</li>
+                        <li><i class="fa-solid fa-check"></i> SELinux mandatory access controls restricting malicious actions.</li>
+                        <li><i class="fa-solid fa-check"></i> iptables/nftables firewall packet filtering.</li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="interactive-card" onclick="toggleCard(this)" style="background-color: #1f2937;">
+                        <h3><i class="fa-solid fa-key" style="color: #60a5fa;"></i> Permission Model</h3>
+                        <p>Understanding user, group, and world permissions (`chmod` / `chown`).</p>
+                        <div class="reveal-content">
+                            <p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Restricts web server worker processes from modifying critical system binaries, preventing privilege escalation exploits.</p>
+                        </div>
+                        <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click for Security Theory</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Linux OS Foundation 3 -->
+    <div class="slide-container" id="slide10">
+        <h2 class="slide-title">Linux OS Foundation: Resource Efficiency</h2>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-gauge-high"></i></div>
+                    <h3>Headless Servers</h3>
+                    <p>Operating without graphical window managers to save system RAM.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> 100% of CPU and RAM dedicated to serving web traffic and database queries.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-memory"></i></div>
+                    <h3>Memory Management</h3>
+                    <p>Advanced virtual memory and swap space optimization.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Efficient page caching speeds up file read/write operations for Apache logs.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-network-wired"></i></div>
+                    <h3>Network Stack Tuning</h3>
+                    <p>Optimized TCP/IP buffer sizes for handling massive concurrent connections.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Prevents SYN flood bottlenecks during traffic spikes.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 11: Apache Web Server 1 -->
+    <div class="slide-container" id="slide11">
+        <h2 class="slide-title">Apache Web Server: Architecture (Click Diagram)</h2>
+        <div class="content-area">
+            <div class="two-column">
+                <div>
+                    <div class="image-wrapper" onclick="openModal('Apache Web Server Architecture', 'Apache HTTP Server is the robust software responsible for accepting incoming web client connections over HTTP/HTTPS and delivering web pages reliably. It features modular request handling, virtual hosting, and high concurrent load balancing capabilities.')">
+                        <img src="https://placehold.co/600x400/1f2937/60a5fa?text=Apache+Server+Architecture" alt="Apache data center architecture network" onerror="this.src='https://placehold.co/600x400/1f2937/60a5fa?text=Apache+Architecture'">
+                        <div class="image-overlay-hint"><i class="fa-solid fa-magnifying-glass-plus"></i> Click to Inspect</div>
+                    </div>
+                </div>
+                <div>
+                    <span class="badge">HTTP REQUEST GATEWAY</span>
+                    <p style="margin-bottom: 10px; color: #d1d5db;">Apache sits right on top of Linux, acting as the primary gateway for web browser communication.</p>
+                    <ul>
+                        <li><i class="fa-solid fa-check"></i> Manages secure SSL/TLS connections & virtual hosts.</li>
+                        <li><i class="fa-solid fa-check"></i> Processes .htaccess directives and URL rewrites.</li>
+                        <li><i class="fa-solid fa-check"></i> Interfaces seamlessly with PHP parsing modules.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 12: Apache Web Server 2 -->
+    <div class="slide-container" id="slide12">
+        <h2 class="slide-title">Apache Web Server: Modularity & Virtual Hosts</h2>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-cubes"></i></div>
+                    <h3>DSO Modules</h3>
+                    <p>Dynamic Shared Objects load only required features into memory.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Includes mod_rewrite, mod_ssl, and mod_php for tailored server behavior.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-globe"></i></div>
+                    <h3>Virtual Hosting</h3>
+                    <p>Hosting multiple distinct domain names on a single physical server IP.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Name-based virtual hosts inspect HTTP request headers to serve correct directories.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-lock"></i></div>
+                    <h3>SSL/TLS Encryption</h3>
+                    <p>Securing data in transit with Let's Encrypt and OpenSSL integration.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Encrypts all communications between client browsers and the web server.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 13: MySQL Database 1 -->
+    <div class="slide-container" id="slide13">
+        <h2 class="slide-title">MySQL Database: Relational Storage</h2>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-database"></i></div>
+                    <h3>Relational Tables</h3>
+                    <p>Organizing structured data into rows, columns, and foreign key relations.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Ensures ACID compliance for reliable, atomic database transactions.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-bolt"></i></div>
+                    <h3>High-Speed Indexing</h3>
+                    <p>B-tree indexes for lightning-fast record retrieval across millions of rows.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Reduces query search time from O(N) linear scans to O(log N) lookups.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-shield-cat"></i></div>
+                    <h3>InnoDB Storage Engine</h3>
+                    <p>Default storage engine supporting row-level locking and foreign keys.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Crash recovery via transaction logs protects against power failure data corruption.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 14: MySQL Database 2 -->
+    <div class="slide-container" id="slide14">
+        <h2 class="slide-title">MySQL Database: Queries & Security</h2>
+        <div class="content-area">
+            <div class="two-column">
+                <div>
+                    <span class="badge">STRUCTURED QUERY LANGUAGE</span>
+                    <p style="margin-bottom: 10px; color: #d1d5db;">Executing robust SQL commands for data manipulation and security.</p>
+                    <ul>
+                        <li><i class="fa-solid fa-check"></i> SELECT, INSERT, UPDATE, DELETE (CRUD operations).</li>
+                        <li><i class="fa-solid fa-check"></i> Prepared statements preventing SQL injection vulnerabilities.</li>
+                        <li><i class="fa-solid fa-check"></i> User privilege grants and password hashing.</li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="interactive-card" onclick="toggleCard(this)" style="background-color: #1f2937;">
+                        <h3><i class="fa-solid fa-user-shield" style="color: #60a5fa;"></i> SQL Security Theory</h3>
+                        <p>Why prepared statements and parameter binding are mandatory.</p>
+                        <div class="reveal-content">
+                            <p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Separates user input data from SQL command syntax, completely neutralizing SQL injection attack vectors.</p>
+                        </div>
+                        <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click for Security Theory</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 15: PHP Scripting Engine 1 -->
+    <div class="slide-container" id="slide15">
+        <h2 class="slide-title">PHP Scripting Engine: Server-Side Logic</h2>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-code"></i></div>
+                    <h3>Dynamic Execution</h3>
+                    <p>Processes backend application rules before sending HTML to browsers.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Source code remains strictly on the server, hidden from end-users.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-window-maximize"></i></div>
+                    <h3>Form & Input Handling</h3>
+                    <p>Validating and sanitizing HTTP POST and GET parameter inputs.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Protects applications against Cross-Site Scripting (XSS) and malformed data.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-cookie-bite"></i></div>
+                    <h3>Session & Cookie State</h3>
+                    <p>Maintaining user login state across multiple HTTP page requests.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Uses server-side session stores linked via secure browser cookies.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 16: PHP Scripting Engine 2 -->
+    <div class="slide-container" id="slide16">
+        <h2 class="slide-title">PHP Scripting Engine: Database Bridge</h2>
+        <div class="content-area">
+            <div class="two-column">
+                <div>
+                    <span class="badge">PDO & MYSQLI DRIVERS</span>
+                    <p style="margin-bottom: 10px; color: #d1d5db;">Connecting PHP application logic seamlessly with MySQL databases.</p>
+                    <ul>
+                        <li><i class="fa-solid fa-check"></i> Object-Oriented database abstraction layers.</li>
+                        <li><i class="fa-solid fa-check"></i> Exception handling for connection timeouts and query errors.</li>
+                        <li><i class="fa-solid fa-check"></i> Connection pooling for high-traffic throughput.</li>
+                    </ul>
+                </div>
+                <div>
+                    <div class="interactive-card" onclick="toggleCard(this)" style="background-color: #1f2937;">
+                        <h3><i class="fa-solid fa-bridge" style="color: #60a5fa;"></i> The PHP-MySQL Bridge</h3>
+                        <p>How PHP queries MySQL and renders dynamic HTML tables.</p>
+                        <div class="reveal-content">
+                            <p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> PHP establishes a socket connection to MySQL, executes the query, fetches result arrays, and loops through data to output dynamic HTML markup.</p>
+                        </div>
+                        <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click for Bridge Theory</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 17: Request Lifecycle 1 -->
+    <div class="slide-container" id="slide17">
+        <h2 class="slide-title">Request Lifecycle: Steps 1 & 2 (Client & Apache)</h2>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-globe"></i></div>
+                    <h3>1. Browser Request</h3>
+                    <p>User enters URL; browser sends HTTP GET request over TCP/IP network.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> DNS resolution translates domain name to server IP address.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-server"></i></div>
+                    <h3>2. Apache Interception</h3>
+                    <p>Apache receives port 80/443 traffic and evaluates virtual host rules.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Determines whether the requested file is static (.html/.jpg) or dynamic (.php).</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 18: Request Lifecycle 2 -->
+    <div class="slide-container" id="slide18">
+        <h2 class="slide-title">Request Lifecycle: Steps 3 & 4 (PHP/DB & Response)</h2>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-gears"></i></div>
+                    <h3>3. PHP & DB Processing</h3>
+                    <p>PHP engine executes script logic, queries MySQL, and builds response.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Data is fetched from database tables and embedded into HTML templates.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-desktop"></i></div>
+                    <h3>4. Client Browser Render</h3>
+                    <p>Apache transmits rendered HTML/CSS/JS back to browser for UI display.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> User sees fully interactive web page rendered in milliseconds.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 19: Code Flowchart Deep Dive -->
+    <div class="slide-container" id="slide19">
+        <h2 class="slide-title">Software Code Flowchart & Architecture Diagram</h2>
+        <div class="content-area">
+            <div class="two-column">
+                <div>
+                    <div class="image-wrapper" onclick="openModal('Software Code Flowchart Explanation', 'This flowchart outlines the structured execution pathway of web application requests. Every client interaction follows an orderly sequence of network transmission, server interception, backend script compilation, database retrieval, and UI rendering.')">
+                        <img src="https://placehold.co/600x400/1f2937/60a5fa?text=Code+Flowchart+Diagram" alt="Software code flowchart architecture diagram" onerror="this.src='https://placehold.co/600x400/1f2937/60a5fa?text=Flowchart'">
+                        <div class="image-overlay-hint"><i class="fa-solid fa-magnifying-glass-plus"></i> Click to Inspect Flowchart</div>
+                    </div>
+                </div>
+                <div>
+                    <span class="badge">EXECUTION PATHWAY</span>
+                    <p style="margin-bottom: 10px; color: #d1d5db;">Structured step-by-step logic execution for reliable web applications.</p>
+                    <ul>
+                        <li><i class="fa-solid fa-check"></i> Standardized error handling and exception logging.</li>
+                        <li><i class="fa-solid fa-check"></i> Modular function calls separating business logic from UI.</li>
+                        <li><i class="fa-solid fa-check"></i> Predictable state management across request lifecycles.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 20: Project Conclusion -->
+    <div class="slide-container" id="slide20">
+        <h2 class="slide-title">Project Conclusion & Key Takeaways</h2>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-award"></i></div>
+                    <h3>Team Achievement</h3>
+                    <p>Completed successfully by Fester Lonappan, Athul Krishna PS, Neil Joshy, and Abel Steephan.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Demonstrated mastery of full-stack web engineering under Holy Grace Academy of Engineering.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-check-double"></i></div>
+                    <h3>Architecture Mastery</h3>
+                    <p>Deep understanding of Linux, Apache, MySQL, PHP, and frontend deployment.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Successfully deployed and documented a professional engineering portfolio website.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 21: Future Scope -->
+    <div class="slide-container" id="slide21">
+        <h2 class="slide-title">Future Scope & Enhancements</h2>
+        <div class="content-area">
+            <div class="tiled-content">
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-box"></i></div>
+                    <h3>Docker Containerization</h3>
+                    <p>Packaging the entire LAMP stack into lightweight, isolated Docker containers.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Ensures identical behavior across development, testing, and production environments.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-infinity"></i></div>
+                    <h3>CI/CD Automation</h3>
+                    <p>Automated testing and deployment pipelines using GitHub Actions.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> Zero-downtime deployments with automated code linting and unit testing.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+                <div class="interactive-card" onclick="toggleCard(this)">
+                    <div style="color: #60a5fa; font-size: 24px; margin-bottom: 10px;"><i class="fa-solid fa-cloud"></i></div>
+                    <h3>Cloud Migration</h3>
+                    <p>Scaling deployment to AWS EC2 or DigitalOcean VPS instances with load balancing.</p>
+                    <div class="reveal-content"><p style="color: #34d399; font-size: 13px;"><strong>Theory:</strong> High availability and automatic failover for high-traffic enterprise demands.</p></div>
+                    <div class="click-hint"><i class="fa-solid fa-chevron-down"></i> Click to Reveal</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 22: Q&A & Acknowledgements -->
+    <div class="slide-container" id="slide22">
+        <div class="title-layout" style="text-align: center;">
+            <h1 style="font-size: 52px; margin-bottom: 15px;">Questions & Answers</h1>
+            <p class="subtitle" style="font-size: 20px; color: #9ca3af;">Thank you for your attention!</p>
+            <div class="team-box" style="margin-top: 25px; display: inline-block; padding: 20px 30px;">
+                <p style="color: #60a5fa; font-weight: 600; font-size: 16px; margin-bottom: 8px;">Holy Grace Academy of Engineering</p>
+                <p style="color: #d1d5db; font-size: 14px;">Website: <a href="https://festerlonappan.github.io/My-website-/" target="_blank" style="color: #34d399; text-decoration: none;">festerlonappan.github.io/My-website-/</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Popup Container -->
+<div id="imageModal" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+        <h3 id="modalTitle" style="color: #60a5fa; font-size: 20px; margin-bottom: 12px;"></h3>
+        <p id="modalDesc" style="color: #d1d5db; font-size: 15px; line-height: 1.5;"></p>
+    </div>
+</div>
+
+<script>
+    let currentSlideIndex = 0;
+    const slides = document.querySelectorAll('.slide-container');
+    const totalSlides = slides.length;
+
+    function updateSlideDisplay() {
+        slides.forEach((slide, index) => {
+            slide.classList.toggle('active-slide', index === currentSlideIndex);
+        });
+        document.getElementById('slideIndicator').innerText = `Slide ${currentSlideIndex + 1} of ${totalSlides}`;
+    }
+
+    function changeSlide(direction) {
+        currentSlideIndex += direction;
+        if (currentSlideIndex < 0) {
+            currentSlideIndex = 0;
+        } else if (currentSlideIndex >= totalSlides) {
+            currentSlideIndex = totalSlides - 1;
+        }
+        updateSlideDisplay();
+    }
+
+    function toggleCard(card) {
+        card.classList.toggle('active');
+    }
+
+    function openModal(title, text) {
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalDesc').innerText = text;
+        document.getElementById('imageModal').classList.add('show');
+    }
+
+    function closeModal() {
+        document.getElementById('imageModal').classList.remove('show');
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight' || e.key === 'Space') {
+            changeSlide(1);
+        } else if (e.key === 'ArrowLeft') {
+            changeSlide(-1);
+        } else if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+
+    updateSlideDisplay();
+</script>
+
+</body>
+</html>
